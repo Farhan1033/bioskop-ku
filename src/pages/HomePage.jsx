@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
 import { localhost } from "../config/localhost";
 import {
-    Nav,
-    Navbar,
     Container,
-    Form,
     Button,
-    Image,
     Card,
     Col,
     Row,
@@ -25,7 +21,12 @@ export default function HomePage() {
         setError(null);
 
         try {
-            const response = await fetch(`${localhost}/schedule/`);
+            const token = localStorage.getItem('token')
+            const response = await fetch(`${localhost}/schedule/`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             const data = await response.json();
 
             if (response.ok) {
@@ -46,33 +47,6 @@ export default function HomePage() {
 
     return (
         <>
-            {/* Navbar */}
-            <Navbar bg="primary" data-bs-theme="dark" expand="lg" fixed="top">
-                <Container>
-                    <Navbar.Brand href="#">
-                        <Image src="logo192.png" width="30" height="30" className="me-2" />
-                        Bioskop-Ku
-                    </Navbar.Brand>
-                    <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                    <Navbar.Collapse id="basic-navbar-nav">
-                        <Nav className="me-auto">
-                            <Nav.Link href="/home">Beranda</Nav.Link>
-                            <Nav.Link href="#films">Film</Nav.Link>
-                            <Nav.Link href="#studio">Studio</Nav.Link>
-                        </Nav>
-                        <Form className="d-flex">
-                            <Form.Control
-                                type="search"
-                                placeholder="Cari Film"
-                                className="me-2"
-                                aria-label="Search"
-                            />
-                            <Button variant="light">Cari</Button>
-                        </Form>
-                    </Navbar.Collapse>
-                </Container>
-            </Navbar>
-
             {/* Content */}
             <Container style={{ marginTop: '90px' }}>
                 {/* Loading Spinner */}

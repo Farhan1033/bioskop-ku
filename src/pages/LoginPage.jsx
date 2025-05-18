@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { localhost } from "../config/localhost.js";
 import { Container, Row, Col, Form, Button, Alert, Spinner } from "react-bootstrap";
 import { useNavigate } from 'react-router-dom';
@@ -14,12 +14,23 @@ export default function LoginPage() {
     const [success, setSuccess] = useState(null);
     const navigate = useNavigate();
 
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            navigate('/home');
+        }
+    }, [navigate]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setUserLogin({
             ...userLogin,
             [name]: value
         });
+        const token = localStorage.getItem('token')
+        if (token) {
+            navigate('/home')
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -44,7 +55,9 @@ export default function LoginPage() {
 
             const data = await response.json();
 
+
             if (response.ok) {
+                localStorage.setItem('token', data.token)
                 setSuccess('Berhasil login!')
                 setUserLogin({
                     email: '',

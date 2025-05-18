@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { localhost } from "../config/localhost.js";
 import { Container, Row, Col, Form, Button, Alert, Spinner } from "react-bootstrap";
+import { useNavigate } from 'react-router-dom';
 
 export default function LoginPage() {
     const [userLogin, setUserLogin] = useState({
@@ -11,6 +12,7 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -48,6 +50,10 @@ export default function LoginPage() {
                     email: '',
                     password: ''
                 });
+
+                setTimeout(() => {
+                    navigate('/home')
+                }, 1000)
             } else {
                 setError(error.message || 'Login gagal!')
             }

@@ -1,6 +1,14 @@
 import { Nav, Navbar, Container, Form, Image, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 function Headers() {
+    const navigate = useNavigate()
+
+    const handleLogout = () => {
+        localStorage.removeItem('token')
+        navigate('/login')
+    }
+
     return (
         <Navbar bg="primary" data-bs-theme="dark" expand="lg" fixed="top">
             <Container>
@@ -12,7 +20,7 @@ function Headers() {
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto">
                         <Nav.Link href="/home">Beranda</Nav.Link>
-                        <Nav.Link href="#films">Film</Nav.Link>
+                        <Nav.Link href="/film">Film</Nav.Link>
                     </Nav>
                     <Form className="d-flex">
                         <Form.Control
@@ -21,7 +29,10 @@ function Headers() {
                             className="me-2"
                             aria-label="Search"
                         />
-                        <Button variant="light">Cari</Button>
+                        <div className="d-flex gap-2">
+                            <Button variant="light">Cari</Button>
+                            <Button variant="danger" onClick={handleLogout}>Logout</Button>
+                        </div>
                     </Form>
                 </Navbar.Collapse>
             </Container>

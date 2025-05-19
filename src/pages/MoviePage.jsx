@@ -21,8 +21,6 @@ export default function MoviePage() {
 
             const data = await response.json();
 
-            console.log(data)
-
             if (response.ok) {
                 setMovies(data.movie || [])
             } else {

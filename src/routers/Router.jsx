@@ -3,7 +3,7 @@ import MainLayout from "../layouts/MainLayout.jsx";
 import HomePage from "../pages/HomePage.jsx";
 import LoginPage from "../pages/LoginPage.jsx";
 import RegisterPage from "../pages/RegisterPage.jsx";
-import MoviePage from "../pages/MoviePage.jsx";
+import DetailMovie from "../pages/DetailMovie.jsx";
 
 const router = createBrowserRouter([
     {
@@ -18,11 +18,11 @@ const router = createBrowserRouter([
                 path: "home",
                 element: <HomePage />
             },
-            {
-                path: "film",
-                element: <MoviePage />
-            }
         ]
+    },
+    {
+        path: "detail-movie/:id",
+        element: <DetailMovie />
     },
     {
         path: "login",

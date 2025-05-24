@@ -1,0 +1,32 @@
+.card {
+    height: 100%;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .card-img-top {
+    height: 300px; /* Sesuaikan tinggi poster */
+    object-fit: cover;
+  }
+  
+  .card-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  h1 {
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .text-muted {
+    font-size: 0.9rem;
+  }
+  

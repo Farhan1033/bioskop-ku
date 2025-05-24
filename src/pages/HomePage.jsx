@@ -1,27 +1,38 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { localhost } from "../config/localhost";
 import {
     Container,
-    Button,
     Card,
     Col,
     Row,
-    Spinner,
-    Alert,
-    Carousel
 } from 'react-bootstrap';
+import { useNavigate } from "react-router-dom";
+import '../css/HomePage.css'
 
 export default function HomePage() {
-    const [schedules, setSchedules] = useState([]);
+    const [schedule, setSchedule] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
-    const fetchSchedules = async () => {
+    const removeDuplicateMovies = (schedules) => {
+        const seen = new Set();
+        return schedules.filter((film) => {
+            if (seen.has(film.movie_id)) {
+                return false;
+            } else {
+                seen.add(film.movie_id);
+                return true;
+            }
+        });
+    };
+
+    const fetchSchedule = useCallback(async () => {
         setIsLoading(true);
         setError(null);
 
         try {
-            const token = localStorage.getItem('token')
+            const token = localStorage.getItem('token');
             const response = await fetch(`${localhost}/schedule/`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -30,113 +41,86 @@ export default function HomePage() {
             const data = await response.json();
 
             if (response.ok) {
-                setSchedules(data.schedules || []);
+                const uniqueSchedules = removeDuplicateMovies(data.schedules || []);
+                setSchedule(uniqueSchedules);
             } else {
-                setError("Gagal mengambil data jadwal.");
+                setError("Gagal mengambil data film.");
             }
         } catch (err) {
             setError("Terjadi kesalahan dalam mengambil data.");
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
-        fetchSchedules();
-    }, []);
+        fetchSchedule();
+    }, [fetchSchedule]);
+
+    const handleSelectFilm = (id) => {
+        navigate(`/detail-movie/${id}`);
+    };
+
+    const indonesianFilms = schedule.filter(film => film.category === 'Indonesia');
+    const internationalFilms = schedule.filter(film => film.category === 'Internasional');
 
     return (
         <>
-            {/* Content */}
-            <Container style={{ marginTop: '90px' }}>
-                {/* Loading Spinner */}
-                {isLoading && (
-                    <div className="text-center my-4">
-                        <Spinner animation="border" role="status">
-                            <span className="visually-hidden">Loading...</span>
-                        </Spinner>
-                    </div>
-                )}
+            <Container className="my-5">
+                <h1 className="mb-4 text-center" style={{ marginTop: '90px' }}>Now Showing</h1>
 
-                {/* Error Message */}
-                {error && (
-                    <Alert variant="danger" className="text-center">
-                        {error}
-                    </Alert>
-                )}
+                {error && <p className="text-danger text-center">{error}</p>}
+                {isLoading && <p className="text-center">Loading...</p>}
 
-                {/* Schedule List */}
-                {!isLoading && !error && schedules.length > 0 && (
-                    <>
-                        {/* Featured Movie Banner - Using first schedule as featured */}
-                        <Carousel className="mb-5">
-                            {schedules.slice(0, 2).map((schedule) => (
-                                <Carousel.Item key={schedule.id} interval={4000}>
-                                    <div
-                                        className="d-block w-100"
-                                        style={{
-                                            height: '400px',
-                                            backgroundImage: `url(${schedule.movie_poster || "https://via.placeholder.com/1200x400?text=Movie+Banner"})`,
-                                            backgroundSize: 'cover',
-                                            backgroundPosition: 'center'
-                                        }}
-                                    />
-                                    <Carousel.Caption className="bg-dark bg-opacity-75 rounded p-3">
-                                        <h3>{schedule.movie_title}</h3>
-                                        <p>
-                                            Studio: {schedule.studio_name} |
-                                            Jam Tayang: {new Date(schedule.show_time).toLocaleString('id-ID', {
-                                                day: '2-digit',
-                                                month: '2-digit',
-                                                year: '2-digit',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
-                                        </p>
-                                    </Carousel.Caption>
-                                </Carousel.Item>
-                            ))}
-                        </Carousel>
+                <h2 className="mb-3">Indonesian Films</h2>
+                <Row>
+                    {indonesianFilms.map((film) => (
+                        <Col key={film.id} md={4} className="mb-4">
+                            <Card
+                                className="h-100 shadow-sm bg-light animate__animated animate__fadeIn"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => handleSelectFilm(film.movie_id)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleSelectFilm(film.id);
+                                }}
+                                tabIndex={0}
+                                role="button"
+                                aria-pressed="false"
+                            >
+                                <Card.Img variant="top" src={film.movie_poster} alt={`${film.movie_title} poster`} />
+                                <Card.Body className="d-flex flex-column justify-content-between">
+                                    <Card.Title className="text-center">{film.movie_title}</Card.Title>
+                                    <div className="text-muted text-center">{film.studio_name}</div>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    ))}
+                </Row>
 
-                        <br></br>
-
-                        <h4 className="mb-3">Jadwal Film</h4>
-                        <Row>
-                            {schedules.map((schedule) => (
-                                <Col key={schedule.id} md={4} sm={6} className="mb-4">
-                                    <Card>
-                                        <Card.Img
-                                            variant="top"
-                                            src={schedule.movie_poster || "https://via.placeholder.com/300x400?text=No+Image"}
-                                            alt={schedule.movie_title}
-                                        />
-                                        <Card.Body>
-                                            <Card.Title>{schedule.movie_title}</Card.Title>
-                                            <Card.Text>
-                                                Studio: {schedule.studio_name}<br />
-                                                Jam Tayang: {new Date(schedule.show_time).toLocaleString('id-ID', {
-                                                    day: '2-digit',
-                                                    month: '2-digit',
-                                                    year: '2-digit',
-                                                    hour: '2-digit',
-                                                    minute: '2-digit'
-                                                })}
-                                            </Card.Text>
-                                            <Button variant="primary">Pesan Tiket</Button>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                            ))}
-                        </Row>
-                    </>
-                )}
-
-                {/* No Data */}
-                {!isLoading && !error && schedules.length === 0 && (
-                    <Alert variant="info" className="text-center">
-                        Tidak ada jadwal film tersedia.
-                    </Alert>
-                )}
+                <h2 className="mb-3">International Films</h2>
+                <Row>
+                    {internationalFilms.map((film) => (
+                        <Col key={film.id} md={4} className="mb-4">
+                            <Card
+                                className="h-100 shadow-sm bg-light animate__animated animate__fadeIn"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => handleSelectFilm(film.movie_id)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleSelectFilm(film.id);
+                                }}
+                                tabIndex={0}
+                                role="button"
+                                aria-pressed="false"
+                            >
+                                <Card.Img variant="top" src={film.movie_poster} alt={`${film.movie_title} poster`} />
+                                <Card.Body className="d-flex flex-column justify-content-between">
+                                    <Card.Title className="text-center">{film.movie_title}</Card.Title>
+                                    <div className="text-muted text-center">{film.studio_name}</div>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    ))}
+                </Row>
             </Container>
         </>
     );

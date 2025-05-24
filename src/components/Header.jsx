@@ -20,7 +20,6 @@ function Headers() {
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto">
                         <Nav.Link href="/home">Beranda</Nav.Link>
-                        <Nav.Link href="/film">Film</Nav.Link>
                     </Nav>
                     <Form className="d-flex">
                         <Form.Control

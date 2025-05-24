@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Container, Row, Button, Col, Image } from "react-bootstrap";
 import { localhost } from "../config/localhost";
+import TimeFormater from "../utils/TimeFormater";
 
 export default function DetailMovie() {
     const [schedules, setSchedules] = useState([]);
@@ -45,10 +46,10 @@ export default function DetailMovie() {
     };
 
     const handleBookNow = (scheduleId) => {
-        navigate(`/booknow/${scheduleId}`);
+        navigate(`/booking-movie/${scheduleId}`);
     };
 
-    const movie = schedules[0]; // asumsi semua jadwal punya movie yg sama
+    const movie = schedules[0];
 
     return (
         <Container className="my-3">
@@ -57,8 +58,12 @@ export default function DetailMovie() {
 
             {!isLoading && movie && (
                 <>
-                    <Button variant="primary" onClick={handleBackToFilms} className="mb-4">
-                        &larr; Back to Films
+                    <Button
+                        variant="primary"
+                        onClick={handleBackToFilms}
+                        className="mb-4"
+                    >
+                        &larr; Back To Home
                     </Button>
 
                     <Row>
@@ -84,12 +89,11 @@ export default function DetailMovie() {
                                 <ul>
                                     {schedules.map(schedule => (
                                         <li key={schedule.id} className="mb-2">
-                                            {new Date(schedule.show_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {schedule.studio_name}
+                                            {TimeFormater(schedule.show_time)} - {schedule.studio_name}
                                         </li>
                                     ))}
                                 </ul>
                             </div>
-
                             <Button
                                 variant="outline-primary"
                                 style={{ width: '30vh', height: '7vh' }}

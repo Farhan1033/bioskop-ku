@@ -4,6 +4,8 @@ import HomePage from "../pages/HomePage.jsx";
 import LoginPage from "../pages/LoginPage.jsx";
 import RegisterPage from "../pages/RegisterPage.jsx";
 import DetailMovie from "../pages/DetailMovie.jsx";
+import BookingPage from "../pages/BookingPage.jsx";
+import QuantityPage from "../pages/QuantityPage.jsx";
 
 const router = createBrowserRouter([
     {
@@ -23,6 +25,14 @@ const router = createBrowserRouter([
     {
         path: "detail-movie/:id",
         element: <DetailMovie />
+    },
+    {
+        path: "booking-movie/:id",
+        element: <BookingPage />
+    },
+    {
+        path: "quantity-seats",
+        element: <QuantityPage />
     },
     {
         path: "login",

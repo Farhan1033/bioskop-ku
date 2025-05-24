@@ -1,6 +1,4 @@
-import React from 'react';
-// import { useSelector, useDispatch } from 'react-redux';
-// import { setQuantity } from '../store';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Button, Row, Col, Card } from 'react-bootstrap';
 import { useBooking } from '../context/BookingContext';
@@ -8,24 +6,30 @@ import DateFormater from '../utils/DateFormater';
 import TimeFormater from '../utils/TimeFormater';
 
 export default function QuantityPage() {
-    //   const quantity = useSelector((state) => state.booking.quantity);
     const navigate = useNavigate();
     const { scheduleId } = useBooking();
 
+    // State lokal untuk quantity
+    const [quantity, setQuantity] = useState(1);
+
     const increment = () => {
-        // if (quantity < 10) {
-        //     dispatch(setQuantity(quantity + 1));
-        // } else {
-        //     window.alert('Maaf, Anda hanya dapat memesan maksimal 10 kursi.');
-        // }
+        if (quantity < 10) {
+            setQuantity(quantity + 1);
+        } else {
+            window.alert('Maaf, Anda hanya dapat memesan maksimal 10 kursi.');
+        }
     };
 
     const decrement = () => {
-        // if (quantity > 1) dispatch(setQuantity(quantity - 1));
+        if (quantity > 1) {
+            setQuantity(quantity - 1);
+        }
     };
 
     const handleNext = () => {
-        navigate('/seat');
+        // Bisa kirim quantity ke halaman seat lewat state, query, atau context
+        // contoh: navigate('/seat', { state: { quantity } });
+        navigate('/seats', { state: quantity });
     };
 
     return (
@@ -48,7 +52,7 @@ export default function QuantityPage() {
                     >-</Button>
                 </Col>
                 <Col xs="auto">
-                    <span className="fs-1"></span>
+                    <span className="fs-1">{quantity}</span>
                 </Col>
                 <Col xs="auto">
                     <Button
@@ -79,7 +83,7 @@ export default function QuantityPage() {
                         <i className="bi bi-calendar"></i>
                         Schedule: {DateFormater(scheduleId.show_time)} - {TimeFormater(scheduleId.show_time)}
                         <br />
-                        <strong>Quantity: </strong>
+                        <strong>Quantity: </strong>{quantity}
                     </Card.Text>
                 </Card.Body>
             </Card>

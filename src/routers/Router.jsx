@@ -6,6 +6,7 @@ import RegisterPage from "../pages/RegisterPage.jsx";
 import DetailMovie from "../pages/DetailMovie.jsx";
 import BookingPage from "../pages/BookingPage.jsx";
 import QuantityPage from "../pages/QuantityPage.jsx";
+import SeatPage from "../pages/SeatPage.jsx";
 
 const router = createBrowserRouter([
     {
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
     {
         path: "quantity-seats",
         element: <QuantityPage />
+    },
+    {
+        path: "seats",
+        element: <SeatPage />
     },
     {
         path: "login",

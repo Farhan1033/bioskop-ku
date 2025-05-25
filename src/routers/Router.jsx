@@ -7,6 +7,8 @@ import DetailMovie from "../pages/DetailMovie.jsx";
 import BookingPage from "../pages/BookingPage.jsx";
 import QuantityPage from "../pages/QuantityPage.jsx";
 import SeatPage from "../pages/SeatPage.jsx";
+import CheckoutPage from "../pages/CheckoutPage.jsx";
+import RecieptPage from "../pages/ReceiptPage.jsx";
 
 const router = createBrowserRouter([
     {
@@ -36,8 +38,16 @@ const router = createBrowserRouter([
         element: <QuantityPage />
     },
     {
-        path: "seats",
+        path: "seats/:id",
         element: <SeatPage />
+    },
+    {
+        path: "checkout",
+        element: <CheckoutPage />
+    },
+    {
+        path: "reciept/:id",
+        element: <RecieptPage />
     },
     {
         path: "login",

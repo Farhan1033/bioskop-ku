@@ -58,6 +58,7 @@ export default function LoginPage() {
 
             if (response.ok) {
                 localStorage.setItem('token', data.token)
+                localStorage.setItem('user_id', data.id)
                 setSuccess('Berhasil login!')
                 setUserLogin({
                     email: '',

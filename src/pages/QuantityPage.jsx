@@ -27,9 +27,7 @@ export default function QuantityPage() {
     };
 
     const handleNext = () => {
-        // Bisa kirim quantity ke halaman seat lewat state, query, atau context
-        // contoh: navigate('/seat', { state: { quantity } });
-        navigate('/seats', { state: quantity });
+        navigate(`/seats/${scheduleId.studio_id}`, { state: quantity });
     };
 
     return (

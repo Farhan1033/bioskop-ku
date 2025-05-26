@@ -11,6 +11,7 @@ import CheckoutPage from "../pages/CheckoutPage.jsx";
 import RecieptPage from "../pages/ReceiptPage.jsx";
 import HistoryPage from "../pages/HistoryPage.jsx";
 import DetailHistory from "../pages/DetailHistoryPage.jsx";
+import SearchPage from "../pages/SearchPage.jsx";
 
 const router = createBrowserRouter([
     {
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
             {
                 path: "detail-history/:movieTitle",
                 element: <DetailHistory />
+            },
+            {
+                path: "search",
+                element: <SearchPage />
             },
         ]
     },

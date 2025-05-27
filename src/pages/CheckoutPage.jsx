@@ -14,7 +14,6 @@ export default function CheckoutPage() {
   const { scheduleId, showtime } = useBooking();
   const location = useLocation();
   const data = location.state;
-  const userId = localStorage.getItem('user_id');
 
   const postDataReceipt = useCallback(async () => {
     setError(null);
@@ -30,10 +29,8 @@ export default function CheckoutPage() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          user_id: userId,
-          schedule_id: scheduleId.id,
+          booking_id: data.idBooking,
           seat_ids: selectedSeats.map(seat => seat.id),
-          total_price: data.totalPrice
         })
       });
 
@@ -43,19 +40,18 @@ export default function CheckoutPage() {
 
       const result = await response.json();
       console.log(result);
-      return result; // Mengembalikan hasil response untuk digunakan di handleConfirm
+      return result;
     } catch (error) {
       setError(error.message);
-      throw error; // Melempar error untuk ditangkap di handleConfirm
+      throw error;
     } finally {
       setIsLoading(false);
     }
-  }, [scheduleId.id, selectedSeats]); // Menambahkan dependencies
+  }, []);
 
   useEffect(() => {
   }, [showtime, selectedSeats]);
 
-  // Validasi awal
   if (!scheduleId?.movie_title || !selectedSeats || selectedSeats.length === 0) {
     return (
       <Container className="my-5">
@@ -68,7 +64,7 @@ export default function CheckoutPage() {
   const handleConfirm = async () => {
     try {
       await postDataReceipt();
-      navigate(`/reciept/${userId}`);
+      navigate(`/reciept/${data.idBooking}`);
     } catch (error) {
       console.error('Checkout failed:', error);
     }
@@ -78,7 +74,6 @@ export default function CheckoutPage() {
     <Container className="my-5">
       <Link to={"/home"} className="btn btn-primary mb-3">&larr; Back to Home</Link>
       <h2>Checkout</h2>
-
       {error && <div className="alert alert-danger">{error}</div>}
 
       <Card className="p-3 mb-4 shadow-sm">

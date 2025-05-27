@@ -28,8 +28,7 @@ export default function HistoryPage() {
 
         try {
             const token = localStorage.getItem('token');
-            const userId = localStorage.getItem('user_id');
-            const response = await fetch(`${localhost}/reservation/user/${userId}`, {
+            const response = await fetch(`${localhost}/reservation/`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -70,7 +69,7 @@ export default function HistoryPage() {
                 {history.map((historyReceipt) => (
                     <Col key={`${historyReceipt.movie_title}-${historyReceipt.id}`} md={4} className="mb-5">
                         <Card border="dark" style={{ width: '18rem' }}>
-                            <Card.Img variant="top" src={historyReceipt.poster_url} alt={historyReceipt.movie_title} />
+                            <Card.Img variant="top" src={historyReceipt.movie_poster} alt={historyReceipt.movie_title} />
                             <Card.Body>
                                 <Card.Title>
                                     {historyReceipt.movie_title} - {historyReceipt.studio_name}

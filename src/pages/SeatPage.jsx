@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Container, Button, Row, Col, Card } from 'react-bootstrap';
 import { localhost } from '../config/localhost';
@@ -13,20 +13,69 @@ export default function SeatPage() {
     const quantity = location.state;
     const rows = 'ABCDEFGHIJ'.split('');
     const { selectedSeats, toggleSeat } = useSeats();
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [booking, setBooking] = useState(null);
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('user_id');
 
     useEffect(() => {
         if (!scheduleId || !scheduleId.studio_id) return;
 
-        const token = localStorage.getItem('token');
         fetch(`${localhost}/seats/studio/${scheduleId.studio_id}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
             .then(data => setSeatsData(data.seats || []))
-            .catch(err => console.error('Failed to fetch seats:', err));
-    }, [scheduleId]);
+            .catch(err => {
+                console.error('Failed to fetch seats:', err);
+                setError('Gagal memuat data kursi');
+            });
+    }, [scheduleId, token]);
+
+    const togglePostBooking = useCallback(async (schedule_id, total_price) => {
+        setError(null);
+        setIsLoading(true);
+
+        try {
+            const response = await fetch(`${localhost}/bookings/add-booking`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    schedule_id: schedule_id,
+                    total_price: total_price
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Booking response:', data);
+
+            // Set booking data dan return untuk digunakan di handleNext
+            setBooking(data.bookings);
+            return data.bookings;
+        } catch (error) {
+            console.error('Booking error:', error);
+            setError('Terjadi kesalahan saat mengirim data, silahkan coba lagi');
+            throw error;
+        } finally {
+            setIsLoading(false);
+        }
+    }, [token, userId]);
 
     const toggleSeatSelection = (seat) => {
         toggleSeat({
@@ -36,19 +85,27 @@ export default function SeatPage() {
         }, quantity);
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
         if (selectedSeats.length === quantity) {
-            const totalPrice = scheduleId.price * quantity;
-            navigate('/checkout', {
-                state: {
-                    totalPrice,
-                    selectedSeats,
-                    quantity,
-                    scheduleInfo: scheduleId,
-                },
-            });
+            try {
+                const totalPrice = scheduleId.price * quantity;
+                
+
+                const bookingData = await togglePostBooking(scheduleId.id, totalPrice);
+
+                navigate('/checkout', {
+                    state: {
+                        selectedSeats,
+                        quantity,
+                        totalPrice,
+                        idBooking: bookingData?.id
+                    },
+                });
+            } catch (error) {
+                console.error('Failed to create booking:', error);
+            }
         } else {
-            alert(`Please select exactly ${quantity} seat(s) for this booking.`);
+            alert(`Silahkan pilih tepat ${quantity} kursi untuk pemesanan ini.`);
         }
     };
 
@@ -58,23 +115,45 @@ export default function SeatPage() {
         return acc;
     }, {});
 
-    const totalPrice = scheduleId.price * quantity;
+    const totalPrice = scheduleId?.price ? scheduleId.price * quantity : 0;
+
+    // Loading state untuk fetch seats
+    if (!scheduleId) {
+        return (
+            <Container className="my-5">
+                <div className="text-center">
+                    <p>Loading...</p>
+                </div>
+            </Container>
+        );
+    }
 
     return (
         <Container className="my-5">
+            {error && (
+                <Row className="mb-3">
+                    <Col>
+                        <div className="alert alert-danger" role="alert">
+                            {error}
+                        </div>
+                    </Col>
+                </Row>
+            )}
+
             <Row>
                 <Col md={8}>
                     <Button
                         variant="primary"
                         onClick={() => navigate('/quantity-seats')}
                         className="mb-3"
+                        disabled={isLoading}
                     >
-                        ← Back to quantity
+                        ← Kembali ke pilihan jumlah
                     </Button>
 
-                    <h2>Select Your Seats</h2>
+                    <h2>Pilih Kursi Anda</h2>
                     <p className="text-muted">
-                        Selected: {selectedSeats.length} / {quantity} seats
+                        Terpilih: {selectedSeats.length} / {quantity} kursi
                     </p>
 
                     <div className="mt-4">
@@ -95,7 +174,7 @@ export default function SeatPage() {
                                                 const seatId = seat.id.toString();
                                                 const isSelected = selectedSeats.some(s => s.id === seatId);
                                                 const isInactive = seat.is_active === 0;
-                                                const isDisabled = isInactive || (!isSelected && selectedSeats.length >= quantity);
+                                                const isDisabled = isInactive || (!isSelected && selectedSeats.length >= quantity) || isLoading;
 
                                                 return (
                                                     <Button
@@ -114,13 +193,13 @@ export default function SeatPage() {
                                                             padding: 0,
                                                             display: 'inline-block',
                                                             opacity: isInactive ? 0.5 : 1,
-                                                            cursor: isInactive ? 'not-allowed' : 'pointer',
+                                                            cursor: isInactive || isLoading ? 'not-allowed' : 'pointer',
                                                         }}
-                                                        onClick={() => !isInactive && toggleSeatSelection(seat)}
+                                                        onClick={() => !isInactive && !isLoading && toggleSeatSelection(seat)}
                                                         disabled={isDisabled}
                                                         aria-pressed={isSelected}
-                                                        aria-label={`Seat ${seat.seat_number} ${isInactive ? '(unavailable)' : ''}`}
-                                                        title={isInactive ? 'Seat not available' : `Seat ${seat.seat_number}`}
+                                                        aria-label={`Kursi ${seat.seat_number} ${isInactive ? '(tidak tersedia)' : ''}`}
+                                                        title={isInactive ? 'Kursi tidak tersedia' : `Kursi ${seat.seat_number}`}
                                                     >
                                                         {seat.seat_number}
                                                     </Button>
@@ -141,7 +220,7 @@ export default function SeatPage() {
                                 style={{ width: 30, height: 30, padding: 0 }}
                                 disabled
                             ></Button>
-                            <small>Available</small>
+                            <small>Tersedia</small>
                         </div>
                         <div className="d-flex align-items-center">
                             <Button
@@ -150,7 +229,7 @@ export default function SeatPage() {
                                 style={{ width: 30, height: 30, padding: 0 }}
                                 disabled
                             ></Button>
-                            <small>Selected</small>
+                            <small>Dipilih</small>
                         </div>
                         <div className="d-flex align-items-center">
                             <Button
@@ -159,7 +238,7 @@ export default function SeatPage() {
                                 style={{ width: 30, height: 30, padding: 0, opacity: 0.5 }}
                                 disabled
                             ></Button>
-                            <small>Unavailable</small>
+                            <small>Tidak Tersedia</small>
                         </div>
                     </div>
 
@@ -168,35 +247,38 @@ export default function SeatPage() {
                             variant="primary"
                             size="lg"
                             onClick={handleNext}
-                            disabled={selectedSeats.length !== quantity}
+                            disabled={selectedSeats.length !== quantity || isLoading}
                         >
-                            Next ({selectedSeats.length}/{quantity} selected)
+                            {isLoading ? 'Memproses...' : `Lanjut (${selectedSeats.length}/${quantity} terpilih)`}
                         </Button>
                     </div>
                 </Col>
 
-                <Col md={3}>
-                    {quantity > 0 && (
+                <Col md={4}>
+                    {quantity > 0 && scheduleId && (
                         <Card className="mt-5" style={{ backgroundColor: '#f7f7f7' }}>
                             <Card.Body>
-                                <Card.Title>ORDER SUMMARY</Card.Title>
+                                <Card.Title>RINGKASAN PESANAN</Card.Title>
                                 <div>
                                     <strong>{scheduleId?.movie_title} - {scheduleId?.studio_name}</strong>
                                     <br />
                                     <i className="bi bi-geo-alt"></i> Studio: {scheduleId?.studio_name}
                                     <hr />
-                                    <strong>Quantity: {quantity}</strong>
+                                    <strong>Jumlah: {quantity}</strong>
                                     <br />
-                                    <strong>Selected Seats: </strong>
-                                    <ul>
-                                        {selectedSeats.map(seat => (
-                                            <li key={seat.id}>{seat.row}{seat.seat_number}</li>
-                                        ))}
-                                    </ul>
-                                    <strong>Total Price: Rp {totalPrice.toLocaleString()}</strong>
+                                    <strong>Kursi Terpilih: </strong>
+                                    {selectedSeats.length > 0 ? (
+                                        <ul>
+                                            {selectedSeats.map(seat => (
+                                                <li key={seat.id}>{seat.row}{seat.seat_number}</li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p className="text-muted">Belum ada kursi dipilih</p>
+                                    )}
+                                    <strong>Total Harga: Rp {totalPrice.toLocaleString('id-ID')}</strong>
                                 </div>
                             </Card.Body>
-
                         </Card>
                     )}
                 </Col>

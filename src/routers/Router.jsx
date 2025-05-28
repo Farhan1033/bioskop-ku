@@ -12,6 +12,12 @@ import RecieptPage from "../pages/ReceiptPage.jsx";
 import HistoryPage from "../pages/HistoryPage.jsx";
 import DetailHistory from "../pages/DetailHistoryPage.jsx";
 import SearchPage from "../pages/SearchPage.jsx";
+import HomeAdmin from "../pages/admin/HomeAdmin.jsx";
+import AdminLayout from "../layouts/AdminLayout.jsx";
+import AdminMovieForm from "../pages/admin/AddMoviePage.jsx";
+import AddMoviePage from "../pages/admin/AddMoviePage.jsx";
+import AddSchedulePage from "../pages/admin/AddSchedulePage.jsx";
+import ActivateSeatPage from "../pages/admin/ActivateSeatsPage.jsx";
 
 const router = createBrowserRouter([
     {
@@ -37,6 +43,28 @@ const router = createBrowserRouter([
             {
                 path: "search",
                 element: <SearchPage />
+            },
+        ]
+    },
+    {
+        path: '/admin',
+        element: <AdminLayout />,
+        children: [
+            {
+                path: "home-admin",
+                element: <HomeAdmin />
+            },
+            {
+                path: 'add-movie',
+                element: <AddMoviePage />
+            },
+            {
+                path: 'add-schedule',
+                element: <AddSchedulePage />
+            },
+            {
+                path: 'activate-all-seats',
+                element: <ActivateSeatPage />
             },
         ]
     },

@@ -59,6 +59,7 @@ export default function LoginPage() {
             if (response.ok) {
                 localStorage.setItem('token', data.token)
                 localStorage.setItem('user_id', data.id)
+                if (data.role === 'admin') return navigate('/home-admin');
                 setSuccess('Berhasil login!')
                 setUserLogin({
                     email: '',

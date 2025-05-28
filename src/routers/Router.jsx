@@ -1,5 +1,10 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout.jsx";
+import AdminLayout from "../layouts/AdminLayout.jsx";
+import ProtectedRoute from "./ProtectedRoute.jsx";
+import AdminRoute from "./AdminRoute.jsx";
+
+// Halaman
 import HomePage from "../pages/HomePage.jsx";
 import LoginPage from "../pages/LoginPage.jsx";
 import RegisterPage from "../pages/RegisterPage.jsx";
@@ -12,8 +17,9 @@ import RecieptPage from "../pages/ReceiptPage.jsx";
 import HistoryPage from "../pages/HistoryPage.jsx";
 import DetailHistory from "../pages/DetailHistoryPage.jsx";
 import SearchPage from "../pages/SearchPage.jsx";
+
+// Admin
 import HomeAdmin from "../pages/admin/HomeAdmin.jsx";
-import AdminLayout from "../layouts/AdminLayout.jsx";
 import AddMoviePage from "../pages/admin/AddMoviePage.jsx";
 import AddSchedulePage from "../pages/admin/AddSchedulePage.jsx";
 import ActivateSeatPage from "../pages/admin/ActivateSeatsPage.jsx";
@@ -25,80 +31,98 @@ const router = createBrowserRouter([
         children: [
             {
                 path: "/",
-                element: <Navigate to='/login' replace />
+                element: <Navigate to="/login" replace />,
             },
             {
                 path: "home",
-                element: <HomePage />
+                element: <ProtectedRoute><HomePage /></ProtectedRoute>
+
             },
             {
                 path: "history",
-                element: <HistoryPage />
+                element: <ProtectedRoute><HistoryPage /></ProtectedRoute>
             },
             {
                 path: "detail-history/:id",
-                element: <DetailHistory />
+                element: <ProtectedRoute><DetailHistory /></ProtectedRoute>
             },
             {
                 path: "search",
-                element: <SearchPage />
+                element: <ProtectedRoute><SearchPage /></ProtectedRoute>
             },
-        ]
+
+        ],
     },
     {
-        path: '/admin',
+        path: "/admin",
         element: <AdminLayout />,
         children: [
             {
                 path: "home-admin",
-                element: <HomeAdmin />
+                element: (
+                    <AdminRoute>
+                        <HomeAdmin />
+                    </AdminRoute>
+                )
             },
             {
-                path: 'add-movie',
-                element: <AddMoviePage />
+                path: "add-movie",
+                element: (
+                    <AdminRoute>
+                        <AddMoviePage />
+                    </AdminRoute>
+                )
             },
             {
-                path: 'add-schedule',
-                element: <AddSchedulePage />
+                path: "add-schedule",
+                element: (
+                    <AdminRoute>
+                        <AddSchedulePage />
+                    </AdminRoute>
+                )
             },
             {
-                path: 'activate-all-seats',
-                element: <ActivateSeatPage />
-            },
+                path: "activate-all-seats",
+                element: (
+                    <AdminRoute>
+                        <ActivateSeatPage />
+                    </AdminRoute>
+                )
+            }
         ]
     },
     {
         path: "detail-movie/:id",
-        element: <DetailMovie />
+        element: <ProtectedRoute><DetailMovie /></ProtectedRoute>,
     },
     {
         path: "booking-movie/:id",
-        element: <BookingPage />
+        element: <ProtectedRoute><BookingPage /></ProtectedRoute>,
     },
     {
         path: "quantity-seats",
-        element: <QuantityPage />
+        element: <ProtectedRoute><QuantityPage /></ProtectedRoute>,
     },
     {
         path: "seats/:id",
-        element: <SeatPage />
+        element: <ProtectedRoute><SeatPage /></ProtectedRoute>,
     },
     {
         path: "checkout",
-        element: <CheckoutPage />
+        element: <ProtectedRoute><CheckoutPage /></ProtectedRoute>,
     },
     {
         path: "receipt",
-        element: <RecieptPage />
+        element: <ProtectedRoute><RecieptPage /></ProtectedRoute>,
     },
     {
         path: "login",
-        element: <LoginPage />
+        element: <LoginPage />,
     },
     {
         path: "register",
-        element: <RegisterPage />
-    },
+        element: <RegisterPage />,
+    }
 ]);
 
 export default router;

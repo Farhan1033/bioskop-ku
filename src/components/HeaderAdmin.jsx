@@ -5,6 +5,7 @@ function HeadersAdmin() {
     const navigate = useNavigate();
 
     const handleLogout = () => {
+        localStorage.removeItem('token');
         navigate('/login');
     };
 
@@ -13,7 +14,7 @@ function HeadersAdmin() {
             <Container>
                 <Navbar.Brand href="#">
                     <Image src="logo192.png" width="30" height="30" className="me-2" />
-                    Bioskop-Ku
+                    Bioskop-Ku Admin
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
@@ -23,9 +24,9 @@ function HeadersAdmin() {
                         <Nav.Link href="/admin/add-schedule">Add Schedule</Nav.Link>
                         <Nav.Link href="/admin/activate-all-seats">Activate Seats</Nav.Link>
                     </Nav>
-                        <div className="d-flex gap-2">
-                            <Button variant="danger" onClick={handleLogout}>Logout</Button>
-                        </div>
+                    <div className="d-flex gap-2">
+                        <Button variant="danger" onClick={handleLogout}>Logout</Button>
+                    </div>
                 </Navbar.Collapse>
             </Container>
         </Navbar>

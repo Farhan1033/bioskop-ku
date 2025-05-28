@@ -55,27 +55,35 @@ export default function LoginPage() {
 
             const data = await response.json();
 
-
-            if (response.ok) {
-                localStorage.setItem('token', data.token)
-                localStorage.setItem('user_id', data.id)
-                if (data.role === 'admin') return navigate('/admin/home-admin');
-                setSuccess('Berhasil login!')
-                setUserLogin({
-                    email: '',
-                    password: ''
-                });
-
-                setTimeout(() => {
-                    navigate('/home')
-                }, 1000)
-            } else {
-                setError(error.message || 'Login gagal!')
+            if (!response.ok) {
+                throw new Error(data.message || 'Login gagal!');
             }
+
+            if (!data.token || !data.role) {
+                throw new Error('Data login tidak lengkap.');
+            }
+
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user_id', data.id);
+            localStorage.setItem('role', data.role);
+
+            setSuccess('Berhasil login!');
+            setUserLogin({ email: '', password: '' });
+
+            setTimeout(() => {
+                if (data.role === 'admin') {
+                    navigate('/admin/home-admin');
+                } else if (data.role === 'user') {
+                    navigate('/home');
+                } else {
+                    navigate('/');
+                }
+            }, 1000);
+
         } catch (error) {
-            setError('Terjadi kesalahan saat login, silahkan coba lagi')
+            setError(error.message || 'Terjadi kesalahan saat login, silahkan coba lagi');
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
     }
 

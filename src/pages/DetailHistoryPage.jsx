@@ -9,14 +9,13 @@ export default function DetailHistory() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-    const { movieTitle } = useParams();
-    const userId = localStorage.getItem('user_id');
+    const { id } = useParams();
 
     useEffect(() => {
         const fetchReservationData = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${localhost}/reservation/user/${userId}`, {
+                const response = await fetch(`${localhost}/reservation/booking/${id}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -27,22 +26,19 @@ export default function DetailHistory() {
                 }
 
                 const data = await response.json();
-                // Filter by movie title and group by showtime
-                const filteredData = data.reservations
-                    .filter(reservation => reservation.movie_title === decodeURIComponent(movieTitle))
-                    .reduce((acc, reservation) => {
-                        const key = `${reservation.show_time}-${reservation.studio_name}`;
-                        if (!acc[key]) {
-                            acc[key] = {
-                                ...reservation,
-                                seats: []
-                            };
-                        }
-                        acc[key].seats.push(`${reservation.row}${reservation.seat_number}`);
-                        return acc;
-                    }, {});
+                const grouped = data.reservationData.reduce((acc, reservation) => {
+                    const key = `${reservation.show_time}-${reservation.studio_name}`;
+                    if (!acc[key]) {
+                        acc[key] = {
+                            ...reservation,
+                            seats: []
+                        };
+                    }
+                    acc[key].seats.push(`${reservation.seat_row}${reservation.seat_number}`);
+                    return acc;
+                }, {});
 
-                setReservationData(Object.values(filteredData));
+                setReservationData(Object.values(grouped));
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -51,7 +47,7 @@ export default function DetailHistory() {
         };
 
         fetchReservationData();
-    }, [userId, movieTitle]);
+    }, [id]);
 
     if (loading) {
         return (
@@ -80,7 +76,7 @@ export default function DetailHistory() {
         return (
             <Container className="my-5">
                 <Alert variant="warning">
-                    <h4>No reservations found for {decodeURIComponent(movieTitle)}</h4>
+                    <h4>No reservations found</h4>
                     <Link to="/history" className="btn btn-primary">Back to History</Link>
                 </Alert>
             </Container>
@@ -93,7 +89,9 @@ export default function DetailHistory() {
 
     return (
         <Container className="my-5">
-            <h2 className="text-center mb-4" style={{ marginTop: '15vh' }}>Detail History for {decodeURIComponent(movieTitle)}</h2>
+            <h2 className="text-center mb-4" style={{ marginTop: '15vh' }}>
+                Detail History for {reservationData[0].movie_title}
+            </h2>
 
             {reservationData.map((reservation) => (
                 <Card key={`${reservation.show_time}-${reservation.studio_name}`} className="mb-4 shadow-sm">
@@ -114,7 +112,7 @@ export default function DetailHistory() {
                                 <Card.Text>
                                     <strong>Showtime:</strong> {TimeFormater(reservation.show_time)}
                                 </Card.Text>
-                                <Card.Text>
+                                <div className="mb-2">
                                     <strong>Seats:</strong>
                                     <div className="d-flex flex-wrap gap-2 mt-2">
                                         {reservation.seats.map((seat) => (
@@ -123,12 +121,12 @@ export default function DetailHistory() {
                                             </Badge>
                                         ))}
                                     </div>
+                                </div>
+                                <Card.Text>
+                                    <strong>Total Price:</strong> Rp{(reservation.total_price).toLocaleString()}
                                 </Card.Text>
                                 <Card.Text>
-                                    <strong>Total Price:</strong> Rp{reservation.total_price.toLocaleString()}
-                                </Card.Text>
-                                <Card.Text>
-                                    <strong>Status:</strong>
+                                    <strong>Status:</strong>{' '}
                                     <Badge bg={reservation.status === 'completed' ? 'success' : 'warning'}>
                                         {reservation.status}
                                     </Badge>

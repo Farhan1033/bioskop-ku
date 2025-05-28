@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Container, Button, Row, Col, Card } from 'react-bootstrap';
 import { localhost } from '../config/localhost';
@@ -8,14 +8,13 @@ import { useSeats } from '../context/SeatContext';
 export default function SeatPage() {
     const navigate = useNavigate();
     const [seatsData, setSeatsData] = useState([]);
-    const { scheduleId } = useBooking();
+    const { scheduleId, setIdBooking } = useBooking();
     const location = useLocation();
     const quantity = location.state;
     const rows = 'ABCDEFGHIJ'.split('');
     const { selectedSeats, toggleSeat } = useSeats();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [booking, setBooking] = useState(null);
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('user_id');
 
@@ -40,42 +39,6 @@ export default function SeatPage() {
             });
     }, [scheduleId, token]);
 
-    const togglePostBooking = useCallback(async (schedule_id, total_price) => {
-        setError(null);
-        setIsLoading(true);
-
-        try {
-            const response = await fetch(`${localhost}/bookings/add-booking`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    user_id: userId,
-                    schedule_id: schedule_id,
-                    total_price: total_price
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.log('Booking response:', data);
-
-            // Set booking data dan return untuk digunakan di handleNext
-            setBooking(data.bookings);
-            return data.bookings;
-        } catch (error) {
-            console.error('Booking error:', error);
-            setError('Terjadi kesalahan saat mengirim data, silahkan coba lagi');
-            throw error;
-        } finally {
-            setIsLoading(false);
-        }
-    }, [token, userId]);
 
     const toggleSeatSelection = (seat) => {
         toggleSeat({
@@ -87,27 +50,49 @@ export default function SeatPage() {
 
     const handleNext = async () => {
         if (selectedSeats.length === quantity) {
+            setIsLoading(true);
             try {
                 const totalPrice = scheduleId.price * quantity;
-                
-
-                const bookingData = await togglePostBooking(scheduleId.id, totalPrice);
-
+    
+                const response = await fetch(`${localhost}/bookings/add-booking`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        schedule_id: scheduleId.id,
+                        total_price: totalPrice
+                    })
+                });
+    
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+    
+                const data = await response.json();
+                const bookingId = data.bookings.id;
+                setIdBooking(bookingId);
+    
                 navigate('/checkout', {
                     state: {
                         selectedSeats,
                         quantity,
                         totalPrice,
-                        idBooking: bookingData?.id
                     },
                 });
             } catch (error) {
                 console.error('Failed to create booking:', error);
+                alert('Gagal melakukan booking. Coba lagi.');
+            } finally {
+                setIsLoading(false);
             }
         } else {
             alert(`Silahkan pilih tepat ${quantity} kursi untuk pemesanan ini.`);
         }
     };
+    
 
     const seatsByRow = seatsData.reduce((acc, seat) => {
         if (!acc[seat.row]) acc[seat.row] = [];
@@ -117,7 +102,6 @@ export default function SeatPage() {
 
     const totalPrice = scheduleId?.price ? scheduleId.price * quantity : 0;
 
-    // Loading state untuk fetch seats
     if (!scheduleId) {
         return (
             <Container className="my-5">

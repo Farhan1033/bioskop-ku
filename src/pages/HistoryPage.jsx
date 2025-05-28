@@ -13,10 +13,10 @@ export default function HistoryPage() {
     const removeDuplicateMovies = (historyFilm) => {
         const seen = new Set();
         return historyFilm.filter((film) => {
-            if (seen.has(film.schedule_id)) {
+            if (seen.has(film.booking_id)) {
                 return false;
             } else {
-                seen.add(film.schedule_id);
+                seen.add(film.booking_id);
                 return true;
             }
         });
@@ -35,7 +35,6 @@ export default function HistoryPage() {
             });
 
             const data = await response.json();
-            console.log(data);
 
             if (response.ok) {
                 const uniqueSchedules = removeDuplicateMovies(data.reservations || []);
@@ -54,8 +53,8 @@ export default function HistoryPage() {
         fetchHistory();
     }, [fetchHistory]);
 
-    const handleDetailHistory = (movieTitle) => {
-        navigate(`/detail-history/${encodeURIComponent(movieTitle)}`);
+    const handleDetailHistory = (id) => {
+        navigate(`/detail-history/${id}`);
     }
 
     return (
@@ -86,7 +85,7 @@ export default function HistoryPage() {
                             <Card.Body>
                                 <Button
                                     variant="primary"
-                                    onClick={() => handleDetailHistory(historyReceipt.movie_title)}
+                                    onClick={() => handleDetailHistory(historyReceipt.booking_id)}
                                 >
                                     Detail History
                                 </Button>

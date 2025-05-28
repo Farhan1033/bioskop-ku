@@ -14,7 +14,6 @@ import DetailHistory from "../pages/DetailHistoryPage.jsx";
 import SearchPage from "../pages/SearchPage.jsx";
 import HomeAdmin from "../pages/admin/HomeAdmin.jsx";
 import AdminLayout from "../layouts/AdminLayout.jsx";
-import AdminMovieForm from "../pages/admin/AddMoviePage.jsx";
 import AddMoviePage from "../pages/admin/AddMoviePage.jsx";
 import AddSchedulePage from "../pages/admin/AddSchedulePage.jsx";
 import ActivateSeatPage from "../pages/admin/ActivateSeatsPage.jsx";
@@ -37,7 +36,7 @@ const router = createBrowserRouter([
                 element: <HistoryPage />
             },
             {
-                path: "detail-history/:movieTitle",
+                path: "detail-history/:id",
                 element: <DetailHistory />
             },
             {
@@ -89,7 +88,7 @@ const router = createBrowserRouter([
         element: <CheckoutPage />
     },
     {
-        path: "reciept/:id",
+        path: "receipt",
         element: <RecieptPage />
     },
     {

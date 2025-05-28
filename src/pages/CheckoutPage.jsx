@@ -1,6 +1,6 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Container, Card, Form, Button } from 'react-bootstrap';
-import { useState, useEffect, useCallback } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Container, Card, Button, Alert } from 'react-bootstrap';
+import { useState, useCallback } from 'react';
 import { useSeats } from '../context/SeatContext';
 import { useBooking } from '../context/BookingContext';
 import TimeFormater from '../utils/TimeFormater';
@@ -8,92 +8,68 @@ import { localhost } from '../config/localhost';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { selectedSeats } = useSeats();
+  const { scheduleId, idBooking } = useBooking();
+  const { quantity, totalPrice } = location.state;
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { selectedSeats } = useSeats();
-  const { scheduleId, showtime } = useBooking();
-  const location = useLocation();
-  const data = location.state;
 
-  const postDataReceipt = useCallback(async () => {
-    setError(null);
+  const handleConfirm = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
 
     try {
       const token = localStorage.getItem('token');
-
       const response = await fetch(`${localhost}/reservation/bulk`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          booking_id: data.idBooking,
+          booking_id: idBooking,
           seat_ids: selectedSeats.map(seat => seat.id),
-        })
+        }),
       });
 
-      if (!response.ok) {
-        throw new Error('Gagal saat post data');
-      }
+      if (!response.ok) throw new Error('Gagal saat post data reservasi.');
 
-      const result = await response.json();
-      console.log(result);
-      return result;
-    } catch (error) {
-      setError(error.message);
-      throw error;
+      await response.json();
+      navigate(`/receipt`);
+    } catch (err) {
+      setError(err.message || 'Terjadi kesalahan saat checkout.');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [idBooking, selectedSeats, navigate]);
 
-  useEffect(() => {
-  }, [showtime, selectedSeats]);
-
-  if (!scheduleId?.movie_title || !selectedSeats || selectedSeats.length === 0) {
+  if (!scheduleId || !idBooking || selectedSeats.length === 0) {
     return (
       <Container className="my-5">
-        <h2>Booking information incomplete</h2>
-        <Link to="/home">Back to films</Link>
+        <h2>Informasi booking tidak lengkap</h2>
+        <Link to="/home">Kembali ke Home</Link>
       </Container>
     );
   }
 
-  const handleConfirm = async () => {
-    try {
-      await postDataReceipt();
-      navigate(`/reciept/${data.idBooking}`);
-    } catch (error) {
-      console.error('Checkout failed:', error);
-    }
-  };
-
   return (
     <Container className="my-5">
-      <Link to={"/home"} className="btn btn-primary mb-3">&larr; Back to Home</Link>
+      <Link to="/home" className="btn btn-primary mb-3">&larr; Kembali ke Home</Link>
       <h2>Checkout</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
+
+      {error && <Alert variant="danger">{error}</Alert>}
 
       <Card className="p-3 mb-4 shadow-sm">
-        <p><strong>Title: </strong>{scheduleId.movie_title}</p>
-        <p><strong>Showtime: </strong>{TimeFormater(scheduleId.show_time)}</p>
-        <p><strong>Quantity: </strong> {data?.quantity}</p>
-        <p><strong>Seats: </strong>
-          {selectedSeats.map(seat => `${seat.row}${seat.seat_number}`).join(', ')}
-        </p>
-        <p><strong>Total Price: </strong> Rp{data?.totalPrice?.toLocaleString()}</p>
+        <p><strong>Judul Film:</strong> {scheduleId.movie_title}</p>
+        <p><strong>Jam Tayang:</strong> {TimeFormater(scheduleId.show_time)}</p>
+        <p><strong>Jumlah Tiket:</strong> {quantity}</p>
+        <p><strong>Kursi:</strong> {selectedSeats.map(seat => `${seat.row}${seat.seat_number}`).join(', ')}</p>
+        <p><strong>Total Harga:</strong> Rp{totalPrice?.toLocaleString()}</p>
       </Card>
 
-      <Button
-        variant="primary"
-        size="lg"
-        onClick={handleConfirm}
-        className="mt-3"
-        disabled={isLoading}
-      >
-        {isLoading ? 'Processing...' : 'Checkout Ticket'}
+      <Button variant="primary" size="lg" onClick={handleConfirm} disabled={isLoading}>
+        {isLoading ? 'Memproses...' : 'Checkout Tiket'}
       </Button>
     </Container>
   );

@@ -1,17 +1,18 @@
-import { createContext, useState, useContext } from "react";
+import React, { createContext, useContext, useState } from 'react';
 
 const BookingContext = createContext();
 
-export const BookingProvider = ({ children }) => {
-    const [scheduleId, setScheduleId] = useState(null);
+export function BookingProvider({ children }) {
+  const [scheduleId, setScheduleId] = useState(null);
+  const [idBooking, setIdBooking] = useState(null);
 
-    return (
-        <BookingContext.Provider value={{ scheduleId, setScheduleId }}>
-            {children}
-        </BookingContext.Provider>
-    )
-};
+  return (
+    <BookingContext.Provider value={{ scheduleId, setScheduleId, idBooking, setIdBooking }}>
+      {children}
+    </BookingContext.Provider>
+  );
+}
 
 export function useBooking() {
-    return useContext(BookingContext);
-} 
+  return useContext(BookingContext);
+}

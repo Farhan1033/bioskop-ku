@@ -14,6 +14,8 @@ export default function AddMoviePage() {
 
     const [films, setFilms] = useState([]);
     const [alertMessage, setAlertMessage] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editId, setEditId] = useState(null);
 
     useEffect(() => {
         fetchFilms();
@@ -38,6 +40,7 @@ export default function AddMoviePage() {
         e.preventDefault();
 
         const filmToSend = {
+            id: editId,
             title: filmData.title,
             description: filmData.description,
             duration: parseInt(filmData.duration),
@@ -46,17 +49,26 @@ export default function AddMoviePage() {
             poster_url: filmData.poster_url,
         };
 
+        const url = isEditing
+            ? `${localhost}/movies/update-movies`
+            : `${localhost}/movies/add-movies`;
+
+        const method = isEditing ? 'PUT' : 'POST';
+
         try {
-            const response = await fetch(`${localhost}/movies/add-movies`, {
-                method: 'POST',
+            const response = await fetch(url, {
+                method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(filmToSend),
             });
 
-            if (!response.ok) throw new Error('Gagal menambahkan film.');
+            if (!response.ok) {
+                throw new Error(isEditing ? 'Gagal mengupdate film.' : 'Gagal menambahkan film.');
+            }
 
-            setAlertMessage('Film berhasil ditambahkan!');
+            setAlertMessage(isEditing ? 'Film berhasil diupdate!' : 'Film berhasil ditambahkan!');
             setTimeout(() => setAlertMessage(null), 3000);
+
             setFilmData({
                 title: '',
                 description: '',
@@ -65,7 +77,8 @@ export default function AddMoviePage() {
                 price: '',
                 category: 'Indonesia',
             });
-
+            setIsEditing(false);
+            setEditId(null);
             fetchFilms();
         } catch (error) {
             alert(error.message);
@@ -73,8 +86,8 @@ export default function AddMoviePage() {
     };
 
     const handleDelete = async (id) => {
-        const confirm = window.confirm('Apakah kamu yakin ingin menghapus film ini?');
-        if (!confirm) return;
+        const confirmDelete = window.confirm('Apakah kamu yakin ingin menghapus film ini?');
+        if (!confirmDelete) return;
 
         try {
             const res = await fetch(`${localhost}/movies/delete-movies`, {
@@ -91,6 +104,32 @@ export default function AddMoviePage() {
         } catch (error) {
             alert(error.message);
         }
+    };
+
+    const handleEdit = (film) => {
+        setFilmData({
+            title: film.title,
+            description: film.description,
+            duration: film.duration.toString(),
+            poster_url: film.poster_url,
+            price: film.price.toString(),
+            category: film.category,
+        });
+        setIsEditing(true);
+        setEditId(film.id);
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditing(false);
+        setEditId(null);
+        setFilmData({
+            title: '',
+            description: '',
+            duration: '',
+            poster_url: '',
+            price: '',
+            category: 'Indonesia',
+        });
     };
 
     return (
@@ -175,8 +214,17 @@ export default function AddMoviePage() {
                         </Form.Group>
 
                         <Button variant="primary" type="submit">
-                            Tambah Film ke Server
+                            {isEditing ? 'Update Film' : 'Tambah Film ke Server'}
                         </Button>
+                        {isEditing && (
+                            <Button
+                                variant="secondary"
+                                className="ms-2"
+                                onClick={handleCancelEdit}
+                            >
+                                Batal Edit
+                            </Button>
+                        )}
                     </Form>
                 </Col>
 
@@ -205,6 +253,14 @@ export default function AddMoviePage() {
                                         <td>Rp {parseInt(film.price).toLocaleString()}</td>
                                         <td>{film.category}</td>
                                         <td>
+                                            <Button
+                                                variant="warning"
+                                                size="sm"
+                                                className="me-2"
+                                                onClick={() => handleEdit(film)}
+                                            >
+                                                Edit
+                                            </Button>
                                             <Button
                                                 variant="danger"
                                                 size="sm"

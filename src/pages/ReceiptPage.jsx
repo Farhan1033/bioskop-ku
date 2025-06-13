@@ -74,7 +74,7 @@ const ReceiptPage = () => {
     return (
         <Container className="my-5">
             <h2 className="text-center mb-4" style={{ marginTop: '15vh' }}>
-                Receipt for {reservationData[0].movie_title}
+                Tiket untuk {reservationData[0].movie_title}
             </h2>
 
             {reservationData.map((info, index) => (
@@ -91,18 +91,18 @@ const ReceiptPage = () => {
                             </Col>
                             <Col md={8}>
                                 <Card.Text><strong>Studio:</strong> {info.studio_name}</Card.Text>
-                                <Card.Text><strong>Showtime:</strong> {new Date(info.show_time).toLocaleString()}</Card.Text>
+                                <Card.Text><strong>Jam Tayang:</strong> {new Date(info.show_time).toLocaleString()}</Card.Text>
                                 <div className="mb-2">
-                                    <strong>Seats:</strong>
+                                    <strong>Kursi:</strong>
                                     <div className="d-flex flex-wrap gap-2 mt-2">
                                         {info.seats.map((seat) => (
                                             <Badge key={seat} bg="secondary" pill>{seat}</Badge>
                                         ))}
                                     </div>
                                 </div>
-                                <Card.Text><strong>Total Seats:</strong> {info.seats.length}</Card.Text>
+                                <Card.Text><strong>Total Kursi:</strong> {info.seats.length}</Card.Text>
                                 {info.total_price && (
-                                    <Card.Text><strong>Total Price:</strong> Rp{Number(info.total_price).toLocaleString()}</Card.Text>
+                                    <Card.Text><strong>Total Harga:</strong> Rp{Number(info.total_price).toLocaleString()}</Card.Text>
                                 )}
                                 <Card.Text>
                                     <strong>Status:</strong>{' '}
@@ -110,7 +110,7 @@ const ReceiptPage = () => {
                                         {info.status}
                                     </Badge>
                                 </Card.Text>
-                                <Card.Text><strong>Booked at:</strong> {new Date(info.reserved_at).toLocaleString()}</Card.Text>
+                                <Card.Text><strong>Dibooking:</strong> {new Date(info.reserved_at).toLocaleString()}</Card.Text>
                             </Col>
                         </Row>
 
@@ -129,7 +129,7 @@ const ReceiptPage = () => {
                                 ))}
                             </div>
                             <p className="text-center text-muted small">
-                                Show this receipt to the cashier.
+                                Tunjukkan barcode ini ke kasir.
                             </p>
                         </div>
                     </Card.Body>
@@ -138,7 +138,7 @@ const ReceiptPage = () => {
 
             <div className="text-center mt-3">
                 <Button variant="primary" onClick={handleBack} size="lg">
-                    Back to Home
+                    Kembali ke Beranda
                 </Button>
             </div>
         </Container>

@@ -37,9 +37,9 @@ export default function QuantityPage() {
                 onClick={() => navigate(`/booking-movie/${scheduleId.movie_id}`)}
                 className="mb-3"
             >
-                &larr; Back to Showtime
+                &larr; Kembali ke Jam Tayang
             </Button>
-            <h2 className="mb-4">Select Quantity</h2>
+            <h2 className="mb-4">Pilih Kuantitas</h2>
             <Row className="justify-content-center align-items-center">
                 <Col xs="auto">
                     <Button
@@ -67,21 +67,21 @@ export default function QuantityPage() {
                     size="lg"
                     onClick={handleNext}
                     style={{ width: '100%' }}
-                >CONFIRM QUANTITY</Button>
+                >Konfirmasi Kuantitas</Button>
             </div>
 
             <Card className="mt-4" style={{ backgroundColor: '#f7f7f7' }}>
                 <Card.Body>
-                    <Card.Title>ORDER SUMMARY</Card.Title>
+                    <Card.Title>RINGKASAN PESANAN</Card.Title>
                     <Card.Text>
                         <strong>{scheduleId.movie_title} - {scheduleId.studio_name}</strong>
                         <br />
                         <i className="bi bi-geo-alt"></i> Studio: {scheduleId.studio_name}
                         <br />
                         <i className="bi bi-calendar"></i>
-                        Schedule: {DateFormater(scheduleId.show_time)} - {TimeFormater(scheduleId.show_time)}
+                        Jadwal: {DateFormater(scheduleId.show_time)} - {TimeFormater(scheduleId.show_time)}
                         <br />
-                        <strong>Quantity: </strong>{quantity}
+                        <strong>Kuantitas: </strong>{quantity}
                     </Card.Text>
                 </Card.Body>
             </Card>

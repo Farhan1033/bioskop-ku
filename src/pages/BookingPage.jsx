@@ -63,10 +63,10 @@ export default function BookingPage() {
             {!isLoading && movie && (
                 <>
                     <Button variant="primary" onClick={() => handleBackToDetails(movie.movie_id)} className="mb-3">
-                        &larr; Back to details
+                        &larr; Kembali ke detail film
                     </Button>
 
-                    <h2>Select Showtime for {movie.movie_title}</h2>
+                    <h2>Pilih Jam Tayang Untuk {movie.movie_title}</h2>
                     <Row className="d-flex flex-wrap gap-2 mt-2">
                         {booking.map((time) => (
                             <Col key={time.id} className="mb-3" xs={6} sm={3} md={4} lg={2}>

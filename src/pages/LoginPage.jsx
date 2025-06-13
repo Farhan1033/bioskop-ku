@@ -127,6 +127,9 @@ export default function LoginPage() {
                                 </>
                             ) : 'Login'}
                         </Button>
+                        <p className="mt-3 text-center">
+                            Belum punya akun? <a href="/register">Daftar di sini</a>
+                        </p>
                     </Form>
                 </Col>
             </Row>

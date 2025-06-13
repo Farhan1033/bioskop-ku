@@ -29,7 +29,7 @@ function Headers() {
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto">
                         <Nav.Link href="/home">Beranda</Nav.Link>
-                        <Nav.Link href="/history">History</Nav.Link>
+                        <Nav.Link href="/history">Histori</Nav.Link>
                     </Nav>
                     <Form className="d-flex" onSubmit={handleSearch}>
                         <Form.Control
@@ -42,7 +42,7 @@ function Headers() {
                         />
                         <div className="d-flex gap-2">
                             <Button variant="light" type="submit">Cari</Button>
-                            <Button variant="danger" onClick={handleLogout}>Logout</Button>
+                            <Button variant="danger" onClick={handleLogout}>Keluar</Button>
                         </div>
                     </Form>
                 </Navbar.Collapse>

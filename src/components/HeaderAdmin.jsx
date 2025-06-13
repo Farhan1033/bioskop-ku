@@ -20,12 +20,12 @@ function HeadersAdmin() {
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto">
                         <Nav.Link href="/admin/home-admin">Beranda</Nav.Link>
-                        <Nav.Link href="/admin/add-movie">Add Movie</Nav.Link>
-                        <Nav.Link href="/admin/add-schedule">Add Schedule</Nav.Link>
-                        <Nav.Link href="/admin/activate-all-seats">Activate Seats</Nav.Link>
+                        <Nav.Link href="/admin/add-movie">Tambah Film</Nav.Link>
+                        <Nav.Link href="/admin/add-schedule">Tambah Jadwal</Nav.Link>
+                        <Nav.Link href="/admin/activate-all-seats">Aktifasi Kursi</Nav.Link>
                     </Nav>
                     <div className="d-flex gap-2">
-                        <Button variant="danger" onClick={handleLogout}>Logout</Button>
+                        <Button variant="danger" onClick={handleLogout}>Keluar</Button>
                     </div>
                 </Navbar.Collapse>
             </Container>

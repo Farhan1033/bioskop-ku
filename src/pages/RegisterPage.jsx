@@ -75,7 +75,7 @@ export default function RegisterPage() {
         <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
             <Row className="w-100" style={{ maxWidth: '500px' }}>
                 <Col>
-                    <h2 className="text-center mb-4">Register</h2>
+                    <h2 className="text-center mb-4">Daftar Akun</h2>
                     {error && <Alert variant="danger">{error}</Alert>}
                     {successMessage && <Alert variant="success">{successMessage}</Alert>}
                     <Form onSubmit={handleSubmit}>
@@ -135,6 +135,10 @@ export default function RegisterPage() {
                                 </>
                             ) : 'Daftar'}
                         </Button>
+
+                        <p className="mt-3 text-center">
+                            Sudah punya akun? <a href="/login">Masuk di sini</a>
+                        </p>
                     </Form>
                 </Col>
             </Row>

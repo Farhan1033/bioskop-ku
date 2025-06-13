@@ -67,12 +67,12 @@ export default function HomePage() {
     return (
         <>
             <Container className="my-5">
-                <h1 className="mb-4 text-center" style={{ marginTop: '90px' }}>Now Showing</h1>
+                <h1 className="mb-4 text-center" style={{ marginTop: '90px' }}>Sedang Tayang</h1>
 
                 {error && <p className="text-danger text-center">{error}</p>}
                 {isLoading && <p className="text-center">Loading...</p>}
 
-                <h2 className="mb-3">Indonesian Films</h2>
+                <h2 className="mb-3">Film Indonesia</h2>
                 <Row>
                     {indonesianFilms.map((film) => (
                         <Col key={film.id} md={4} className="mb-4">
@@ -97,7 +97,7 @@ export default function HomePage() {
                     ))}
                 </Row>
 
-                <h2 className="mb-3">International Films</h2>
+                <h2 className="mb-3">Film Internasional</h2>
                 <Row>
                     {internationalFilms.map((film) => (
                         <Col key={film.id} md={4} className="mb-4">

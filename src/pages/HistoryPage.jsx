@@ -59,7 +59,7 @@ export default function HistoryPage() {
 
     return (
         <Container className="my-5">
-            <h2 className="text-center mb-4" style={{ marginTop: '15vh' }}>History Ticket</h2>
+            <h2 className="text-center mb-4" style={{ marginTop: '15vh' }}>Histori Tiket</h2>
 
             {error && <p className="text-danger text-center">{error}</p>}
             {isLoading && <p className="text-center">Loading...</p>}
@@ -87,7 +87,7 @@ export default function HistoryPage() {
                                     variant="primary"
                                     onClick={() => handleDetailHistory(historyReceipt.booking_id)}
                                 >
-                                    Detail History
+                                    Detail Histori
                                 </Button>
                             </Card.Body>
                         </Card>

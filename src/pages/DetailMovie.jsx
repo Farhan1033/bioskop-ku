@@ -63,7 +63,7 @@ export default function DetailMovie() {
                         onClick={handleBackToFilms}
                         className="mb-4"
                     >
-                        &larr; Back To Home
+                        &larr; Kembali ke beranda
                     </Button>
 
                     <Row>
@@ -82,10 +82,10 @@ export default function DetailMovie() {
                                 <h2>{movie.movie_title}</h2>
                                 <p className="lead" style={{ textAlign: 'justify' }}>{movie.description}</p>
 
-                                <h5>Price</h5>
+                                <h5>Harga</h5>
                                 <p className="lead" style={{ textAlign: 'justify' }}>Rp. {movie.price}</p>
 
-                                <h5>Show Times:</h5>
+                                <h5>Jam Tayang:</h5>
                                 <ul>
                                     {schedules.map(schedule => (
                                         <li key={schedule.id} className="mb-2">
@@ -99,7 +99,7 @@ export default function DetailMovie() {
                                 style={{ width: '30vh', height: '7vh' }}
                                 onClick={() => handleBookNow(movie.movie_id)}
                             >
-                                Book Now
+                                Pesan Sekarang
                             </Button>
                         </Col>
                     </Row>

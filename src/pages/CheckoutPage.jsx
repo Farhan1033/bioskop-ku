@@ -48,7 +48,7 @@ export default function CheckoutPage() {
     return (
       <Container className="my-5">
         <h2>Informasi booking tidak lengkap</h2>
-        <Link to="/home">Kembali ke Home</Link>
+        <Link to="/home">Kembali ke Beranda</Link>
       </Container>
     );
   }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Container, Button, Row, Col, Card } from 'react-bootstrap';
+import { Container, Button, Row, Col, Card, Spinner } from 'react-bootstrap';
 import { localhost } from '../config/localhost';
 import { useBooking } from '../context/BookingContext';
 import { useSeats } from '../context/SeatContext';
@@ -8,6 +8,7 @@ import { useSeats } from '../context/SeatContext';
 export default function SeatPage() {
     const navigate = useNavigate();
     const [seatsData, setSeatsData] = useState([]);
+    const [bookedSeatIds, setBookedSeatIds] = useState([]);
     const { scheduleId, setIdBooking } = useBooking();
     const location = useLocation();
     const quantity = location.state;
@@ -17,28 +18,41 @@ export default function SeatPage() {
     const [error, setError] = useState(null);
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('user_id');
+    const [isLoadingSeats, setIsLoadingSeats] = useState(true);
+
 
     useEffect(() => {
         if (!scheduleId || !scheduleId.studio_id) return;
 
-        fetch(`${localhost}/seats/studio/${scheduleId.studio_id}`, {
+        setIsLoadingSeats(true);
+
+        // Ambil kursi studio
+        const fetchSeats = fetch(`${localhost}/seats/studio/${scheduleId.studio_id}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
-        })
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error(`HTTP error! status: ${res.status}`);
-                }
-                return res.json();
+        }).then(res => res.json());
+
+        // Ambil kursi yang sudah dipesan untuk jadwal tersebut
+        const fetchBookedSeats = fetch(`${localhost}/reservation/schedule/${scheduleId.id}/booked-seats`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }).then(res => res.json());
+
+        Promise.all([fetchSeats, fetchBookedSeats])
+            .then(([seatsRes, bookedSeatsRes]) => {
+                setSeatsData(seatsRes.seats || []);
+                setBookedSeatIds(bookedSeatsRes || []);
             })
-            .then(data => setSeatsData(data.seats || []))
             .catch(err => {
-                console.error('Failed to fetch seats:', err);
+                console.error('Gagal memuat data kursi:', err);
                 setError('Gagal memuat data kursi');
+            })
+            .finally(() => {
+                setIsLoadingSeats(false);
             });
     }, [scheduleId, token]);
-
 
     const toggleSeatSelection = (seat) => {
         toggleSeat({
@@ -53,7 +67,6 @@ export default function SeatPage() {
             setIsLoading(true);
             try {
                 const totalPrice = scheduleId.price * quantity;
-    
                 const response = await fetch(`${localhost}/bookings/add-booking`, {
                     method: 'POST',
                     headers: {
@@ -66,15 +79,13 @@ export default function SeatPage() {
                         total_price: totalPrice
                     })
                 });
-    
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-    
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
                 const data = await response.json();
                 const bookingId = data.bookings.id;
                 setIdBooking(bookingId);
-    
+
                 navigate('/checkout', {
                     state: {
                         selectedSeats,
@@ -83,7 +94,7 @@ export default function SeatPage() {
                     },
                 });
             } catch (error) {
-                console.error('Failed to create booking:', error);
+                console.error('Gagal booking:', error);
                 alert('Gagal melakukan booking. Coba lagi.');
             } finally {
                 setIsLoading(false);
@@ -92,7 +103,6 @@ export default function SeatPage() {
             alert(`Silahkan pilih tepat ${quantity} kursi untuk pemesanan ini.`);
         }
     };
-    
 
     const seatsByRow = seatsData.reduce((acc, seat) => {
         if (!acc[seat.row]) acc[seat.row] = [];
@@ -104,10 +114,17 @@ export default function SeatPage() {
 
     if (!scheduleId) {
         return (
-            <Container className="my-5">
-                <div className="text-center">
-                    <p>Loading...</p>
-                </div>
+            <Container className="my-5 text-center">
+                <p>Loading...</p>
+            </Container>
+        );
+    }
+
+    if (isLoadingSeats) {
+        return (
+            <Container className="my-5 text-center">
+                <Spinner animation="border" role="status" />
+                <p className="mt-2">Memuat data kursi...</p>
             </Container>
         );
     }
@@ -117,9 +134,7 @@ export default function SeatPage() {
             {error && (
                 <Row className="mb-3">
                     <Col>
-                        <div className="alert alert-danger" role="alert">
-                            {error}
-                        </div>
+                        <div className="alert alert-danger">{error}</div>
                     </Col>
                 </Row>
             )}
@@ -157,14 +172,14 @@ export default function SeatPage() {
                                             {sortedSeats.map(seat => {
                                                 const seatId = seat.id.toString();
                                                 const isSelected = selectedSeats.some(s => s.id === seatId);
-                                                const isInactive = seat.is_active === 0;
-                                                const isDisabled = isInactive || (!isSelected && selectedSeats.length >= quantity) || isLoading;
+                                                const isBooked = bookedSeatIds.includes(seatId);
+                                                const isDisabled = isBooked || (!isSelected && selectedSeats.length >= quantity) || isLoading;
 
                                                 return (
                                                     <Button
                                                         key={seatId}
                                                         variant={
-                                                            isInactive
+                                                            isBooked
                                                                 ? 'secondary'
                                                                 : isSelected
                                                                     ? 'danger'
@@ -176,14 +191,13 @@ export default function SeatPage() {
                                                             height: 36,
                                                             padding: 0,
                                                             display: 'inline-block',
-                                                            opacity: isInactive ? 0.5 : 1,
-                                                            cursor: isInactive || isLoading ? 'not-allowed' : 'pointer',
+                                                            opacity: isBooked ? 0.5 : 1,
+                                                            cursor: isDisabled ? 'not-allowed' : 'pointer',
                                                         }}
-                                                        onClick={() => !isInactive && !isLoading && toggleSeatSelection(seat)}
+                                                        onClick={() => !isDisabled && toggleSeatSelection(seat)}
                                                         disabled={isDisabled}
                                                         aria-pressed={isSelected}
-                                                        aria-label={`Kursi ${seat.seat_number} ${isInactive ? '(tidak tersedia)' : ''}`}
-                                                        title={isInactive ? 'Kursi tidak tersedia' : `Kursi ${seat.seat_number}`}
+                                                        title={isBooked ? 'Kursi sudah dipesan' : `Kursi ${seat.seat_number}`}
                                                     >
                                                         {seat.seat_number}
                                                     </Button>
@@ -198,31 +212,16 @@ export default function SeatPage() {
 
                     <div className="mt-4 d-flex justify-content-center gap-4">
                         <div className="d-flex align-items-center">
-                            <Button
-                                variant="outline-secondary"
-                                className="rounded-circle me-2"
-                                style={{ width: 30, height: 30, padding: 0 }}
-                                disabled
-                            ></Button>
+                            <Button variant="outline-secondary" className="rounded-circle me-2" style={{ width: 30, height: 30 }} disabled />
                             <small>Tersedia</small>
                         </div>
                         <div className="d-flex align-items-center">
-                            <Button
-                                variant="danger"
-                                className="rounded-circle me-2"
-                                style={{ width: 30, height: 30, padding: 0 }}
-                                disabled
-                            ></Button>
+                            <Button variant="danger" className="rounded-circle me-2" style={{ width: 30, height: 30 }} disabled />
                             <small>Dipilih</small>
                         </div>
                         <div className="d-flex align-items-center">
-                            <Button
-                                variant="secondary"
-                                className="rounded-circle me-2"
-                                style={{ width: 30, height: 30, padding: 0, opacity: 0.5 }}
-                                disabled
-                            ></Button>
-                            <small>Tidak Tersedia</small>
+                            <Button variant="secondary" className="rounded-circle me-2" style={{ width: 30, height: 30, opacity: 0.5 }} disabled />
+                            <small>Sudah Dipesan</small>
                         </div>
                     </div>
 
@@ -244,9 +243,8 @@ export default function SeatPage() {
                             <Card.Body>
                                 <Card.Title>RINGKASAN PESANAN</Card.Title>
                                 <div>
-                                    <strong>{scheduleId?.movie_title} - {scheduleId?.studio_name}</strong>
+                                    <strong>{scheduleId.movie_title} - {scheduleId.studio_name}</strong>
                                     <br />
-                                    <i className="bi bi-geo-alt"></i> Studio: {scheduleId?.studio_name}
                                     <hr />
                                     <strong>Jumlah: {quantity}</strong>
                                     <br />

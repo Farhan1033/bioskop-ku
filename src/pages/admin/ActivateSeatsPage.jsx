@@ -5,20 +5,20 @@ import { localhost } from '../../config/localhost';
 export default function ActivateSeatPage() {
   const [alertMessage, setAlertMessage] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [studios, setStudios] = useState([]);
+  const [schedules, setSchedules] = useState([]);
   const [formData, setFormData] = useState({
-    studio_id: '',
+    schedule_id: '',
   });
 
   const handleActivateSeats = async () => {
-    if (!formData.studio_id) {
-      alert('Silakan pilih studio terlebih dahulu.');
+    if (!formData.schedule_id) {
+      alert('Silakan pilih jadwal terlebih dahulu.');
       return;
     }
 
     try {
       setLoading(true);
-      const response = await fetch(`${localhost}/seats/activate/${formData.studio_id}`, {
+      const response = await fetch(`${localhost}/seats/activate/${formData.schedule_id}`, {
         method: 'PATCH',
       });
 
@@ -35,13 +35,20 @@ export default function ActivateSeatPage() {
     }
   };
 
-  const fetchStudios = async () => {
+  const fetchSchedulesFromBookings = async () => {
     try {
-      const res = await fetch(`${localhost}/studios/get-studios`);
+      const res = await fetch(`${localhost}/bookings/data-admin`);
       const data = await res.json();
-      setStudios(data.studio || []);
+
+      const bookingList = data.booking || [];
+
+      const uniqueSchedules = Array.from(
+        new Map(bookingList.map(item => [item.schedule_id, item])).values()
+      );
+  
+      setSchedules(uniqueSchedules);
     } catch (error) {
-      console.error('Gagal mengambil data studio:', error);
+      console.error('Gagal mengambil data bookings:', error);
     }
   };
 
@@ -51,12 +58,12 @@ export default function ActivateSeatPage() {
   };
 
   useEffect(() => {
-    fetchStudios();
+    fetchSchedulesFromBookings();
   }, []);
 
   return (
     <Container style={{ marginTop: '15vh' }}>
-      <h2 className="mb-4">Aktivasi Semua Kursi</h2>
+      <h2 className="mb-4">Aktivasi Kursi Berdasarkan Jadwal</h2>
 
       {alertMessage && <Alert variant="success">{alertMessage}</Alert>}
 
@@ -64,17 +71,17 @@ export default function ActivateSeatPage() {
         <Row>
           <Col md={6}>
             <Form.Group className="mb-3">
-              <Form.Label>Pilih Studio</Form.Label>
+              <Form.Label>Pilih Jadwal Film</Form.Label>
               <Form.Select
-                name="studio_id"
-                value={formData.studio_id}
+                name="schedule_id"
+                value={formData.schedule_id}
                 onChange={handleChange}
                 required
               >
-                <option value="">-- Pilih Studio --</option>
-                {studios.map((studio) => (
-                  <option key={studio.id} value={studio.id}>
-                    {studio.name}
+                <option value="">-- Pilih Jadwal --</option>
+                {schedules.map((item) => (
+                  <option key={item.schedule_id} value={item.schedule_id}>
+                    {item.movie_title} - {new Date(item.show_time).toLocaleString()}
                   </option>
                 ))}
               </Form.Select>
@@ -85,7 +92,7 @@ export default function ActivateSeatPage() {
               onClick={handleActivateSeats}
               disabled={loading}
             >
-              {loading ? 'Mengaktifkan...' : 'Aktifkan Semua Kursi'}
+              {loading ? 'Mengaktifkan...' : 'Aktifkan Kursi untuk Jadwal Ini'}
             </Button>
           </Col>
         </Row>

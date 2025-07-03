@@ -13,7 +13,7 @@ function HeadersAdmin() {
         <Navbar bg="primary" data-bs-theme="dark" expand="lg" fixed="top">
             <Container>
                 <Navbar.Brand href="#">
-                    <Image src="logo192.png" width="30" height="30" className="me-2" />
+                    <Image src="https://st3.depositphotos.com/1588812/13325/v/450/depositphotos_133255394-stock-illustration-vector-logo-cinema.jpg" width="30" height="30" className="me-2" />
                     Bioskop-Ku Admin
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />

@@ -35,6 +35,7 @@ export default function HistoryPage() {
             });
 
             const data = await response.json();
+            console.log(data)
 
             if (response.ok) {
                 const uniqueSchedules = removeDuplicateMovies(data.reservations || []);
